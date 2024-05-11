@@ -1,0 +1,12 @@
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-google-genai
+langsmith
+google-generativeai
+requests
+qdrant-client
+nltk
+pandas
+numpy
