@@ -3,3 +3,5 @@ data/
 env
 lnxenv/
 trash/
+chroma_db/
+qdrantDB
