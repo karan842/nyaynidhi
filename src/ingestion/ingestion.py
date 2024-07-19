@@ -30,13 +30,13 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=gemini_api_key)
 
 # Collection name
-collection_name = 'ipc-data-001'
+collection_name = 'ipc-data'
 
 # IPC data file path
 ipc_data_path = './data/ipc_data.json'
 
 # Splitter
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
 
 # Store in vector database
 def ingest_in_vectordb(text_chunk, embedding_model):
