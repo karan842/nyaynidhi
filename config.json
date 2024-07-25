@@ -1,0 +1,7 @@
+{
+    "EMBEDDING_MODEL": "models/text-embedding-004",
+    "GEMINI": "gemini-1.0-pro",
+    "LLAMA": "llama-3.1-70b-versatile",
+    "MIXTRAL": "mixtral-8x7b-32768",
+    "COLLECTION_NAME": "ipc-data-001"
+}
