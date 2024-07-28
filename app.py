@@ -1,7 +1,8 @@
 import streamlit as st 
 import os 
 import json
-from src.retriever.retriever import memory_chain
+from src.retriever import memory_chain
+from src.agents import ipc_agent
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient 
 
@@ -39,9 +40,12 @@ def main():
             st.session_state.chat_history = []
         else:
             # Call memory_chain function (replace with your actual function)
-            response = memory_chain(query, st.session_state.chat_history, embedding_model, llm, client, collection_name)
-            st.session_state.chat_history.extend([query, response["answer"]])
-            st.markdown(response["answer"])
+            
+            # response = memory_chain(query, st.session_state.chat_history, embedding_model, llm, client, collection_name)
+            
+            response = ipc_agent(query, st.session_state.chat_history, embedding_model, llm, client, collection_name)
+            st.session_state.chat_history.extend({"human":query, "ai":response["output"]})
+            st.markdown(response["output"])
             
 if __name__ == '__main__':
     main()
