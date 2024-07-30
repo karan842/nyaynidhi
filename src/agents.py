@@ -14,6 +14,8 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import Qdrant
+from langchain.retrievers.document_compressors import FlashrankRerank
+from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain import hub 
 from langchain_chroma import Chroma
 from qdrant_client import QdrantClient
@@ -49,13 +51,19 @@ def ipc_agent(query, chat_history, embedding_model, llm, client, collection_name
 
     # Define vector retriever
     vector_db = vector_store(embeddings, client_url, collection_name)
-    retriever = vector_db.as_retriever(top_k=5)
+    retriever = vector_db.as_retriever(top_k=20)
+    
+    # ReRank compressor
+    compressor = FlashrankRerank()
+    compression_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, base_retriever=retriever
+    )
 
     # Define RetrievalQA
     qa = RetrievalQA.from_chain_type(
         llm=llm, 
         chain_type="stuff",
-        retriever=retriever,
+        retriever=compression_retriever,
         return_source_documents=True,
     )
 
