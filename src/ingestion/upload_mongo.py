@@ -16,17 +16,20 @@ with open(config_file, "r") as file:
 collection_name = config['COLLECTION_NAME']
 mongo_db_name = config['MONGODB']
 
-def insert_to_mongo(url, db_name, collection_name): 
+def insert_to_mongo(url, db_name, collection_name, section_type): 
     
     # Connect to MongoDB
     client = MongoClient(url)
     mongo_db = client[mongo_db_name]
-    collection = mongo_db[collection_name]
+    collection_name = mongo_db[collection_name]
+    
+    # Create collection
+    collection = mongo_db.create_collection(collection_name)
 
     print("Loading data from JSON")
     
     # Read JSON data from a file 
-    with open('./data/ipc_data.json', 'r') as ipc_data_file:
+    with open(f'./data/{section_type}_data.json', 'r') as ipc_data_file:
         ipc_data = json.load(ipc_data_file)
 
     print("Inserting the data")
@@ -43,4 +46,4 @@ def insert_to_mongo(url, db_name, collection_name):
 
 
 if __name__ == '__main__':
-    insert_to_mongo(mongo_url, mongo_db_name, collection_name)
+    insert_to_mongo(mongo_url, mongo_db_name, "crpc-data-001", "crpc")
