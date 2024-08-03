@@ -7,27 +7,36 @@ import asyncio
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
+# Load config file 
+config_file = "config.json"
+with open(config_file, "r") as file:
+    config = json.load(file)
+
+
 # Scrap list of links
-def scrape_links(url):
-    respone = requests.get(url)
-    soup = BeautifulSoup(respone.content, 'html.parser')
+class StoreDevganLinks:
+    def __init__(self, url):
+        self.url = url 
+        self.section_type = url.split('_')[-1].split('.')[0] # APPLIED FOR DEVGAN LAWS LINK 
+        print(self.section_type)
     
-    links = [link.get('href') for link in soup.find_all('a')]
-    urls = [f'https://devgan.in{link}' for link in links if link.startswith('/ipc/section/')]
+    def scrape_links(self):
+        respone = requests.get(self.url)
+        soup = BeautifulSoup(respone.content, 'html.parser')
+        
+        links = [link.get('href') for link in soup.find_all('a')]
+        urls = [f'https://devgan.in{link}' for link in links if link and link.startswith(f'/{self.section_type}/section/')]
+        return {"urls": urls}
 
-    return {"urls": urls}
-
-
-def main():
-    url = "https://devgan.in/all_sections_ipc.php"
-    data = scrape_links(url)
-    
-    with open('ipc_urls.json', 'w') as file:
-        json.dump(data, file, indent=2)
+    def get_urls(self):
+        data = self.scrape_links()
+        
+        with open(f'./data/{self.section_type}_urls.json', 'w') as file:
+            json.dump(data, file, indent=2)
 
 
 # Scrap data from each url
-async def scrape_urls(url_data):
+async def scrape_urls(url_data, section_type):
     output_data = []
 
     async with ClientSession() as session:
@@ -51,7 +60,7 @@ async def scrape_urls(url_data):
             # Combine the scraped elements into a single dictionary
             data = {
                 'content': '\n'.join(p_elements + h2_elements),
-                'section': section
+                'section': section_type + '-' + section
             }
 
             # Add the data to the output list
@@ -59,17 +68,20 @@ async def scrape_urls(url_data):
 
     return output_data
 
-async def main():
+async def main(section_type):
     # Load the JSON data
-    with open('urls.json', 'r') as file:
+    with open(f'./data/{section_type}_urls.json', 'r') as file:
         url_data = json.load(file)
 
     # Scrape the URLs
-    output_data = await scrape_urls(url_data)
+    output_data = await scrape_urls(url_data, section_type)
 
     # Save the output data to a JSON file
-    with open('ipc_data.json', 'w') as file:
+    with open(f'./data/{section_type}_data.json', 'w') as file:
         json.dump(output_data, file, indent=2)
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(main("jja"))
+    # links = StoreDevganLinks(url=config['DEVGAN_LAW_LINKS']['JJA'])
+    # links.scrape_links()
+    # links.get_urls()

@@ -22,7 +22,6 @@ from langchain_core.output_parsers import StrOutputParser
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 groq_api_key = os.getenv('GROQ_API_KEY')
-os.environ["LANGCHAIN_WANDB_TRACING"] = "true"
 
 # Load configuraion
 config_file = "config.json"
