@@ -17,7 +17,6 @@ from langchain_community.vectorstores import Qdrant
 from langchain.retrievers.document_compressors import FlashrankRerank
 from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
 from langchain import hub 
-from langchain_chroma import Chroma
 from qdrant_client import QdrantClient
 from src.retriever import vector_store
 
