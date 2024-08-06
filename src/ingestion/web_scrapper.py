@@ -54,12 +54,13 @@ async def scrape_urls(url_data, section_type):
             # Scrape the desired elements
             p_elements = [p.get_text() for p in soup.find_all('p')]
             h2_elements = [h2.get_text() for h2 in soup.find_all('h2')]
+            li_elements = [li.get_text().strip() for li in soup.find_all('li')]
             # a_elements = [a.get_text() for a in soup.find_all('a')]
             # href_elements = [a.get('href', '') for a in soup.find_all('a')]
 
             # Combine the scraped elements into a single dictionary
             data = {
-                'content': '\n'.join(p_elements + h2_elements),
+                'content': '\n'.join(p_elements + h2_elements + li_elements),
                 'section': section_type + '-' + section
             }
 
