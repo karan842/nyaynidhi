@@ -4,10 +4,11 @@
     "LLAMA": "llama-3.1-70b-versatile",
     "MIXTRAL": "mixtral-8x7b-32768",
     "COLLECTION_NAME": "ipc-data-001",
+    "LAWS-COLLECTION-NAME": "law_data-002",
     "MONGODB": "nyaynidhi",
     "DEVGAN_LAW_LINKS": {
-        "IPC": "https://devgan.in/all_sections_ipc.php",
-        "CRPC": "https://devgan.in/all_sections_crpc.php",
-        "JJA": "https://devgan.in/all_sections_jja.php"
+        "ipc": "https://devgan.in/all_sections_ipc.php",
+        "crpc": "https://devgan.in/all_sections_crpc.php",
+        "jja": "https://devgan.in/all_sections_jja.php"
     }
 }
