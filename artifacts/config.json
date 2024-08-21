@@ -3,12 +3,21 @@
     "GEMINI": "gemini-1.0-pro",
     "LLAMA": "llama-3.1-70b-versatile",
     "MIXTRAL": "mixtral-8x7b-32768",
-    "COLLECTION_NAME": "ipc-data-001",
+    "COLLECTION_NAME": {
+        "ipc-100": "ipc-data-001",
+        "ipc-800": "ipc-data-002",
+        "all-section": "all-sections-data-001",
+        "bns-001": "bns-data-001"
+    },
     "LAWS-COLLECTION-NAME": "law_data-002",
     "MONGODB": "nyaynidhi",
     "DEVGAN_LAW_LINKS": {
         "ipc": "https://devgan.in/all_sections_ipc.php",
         "crpc": "https://devgan.in/all_sections_crpc.php",
         "jja": "https://devgan.in/all_sections_jja.php"
+    },
+    "PROMPT_TEMPLATES": {
+        "IPC_PROMPTS":"./prompt_templates/ipc_section_prompt.txt",
+        "BNS_PROMPTS":"./prompt_templates/bns_prompts.txt"
     }
 }
