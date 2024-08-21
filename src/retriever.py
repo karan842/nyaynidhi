@@ -24,12 +24,12 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 groq_api_key = os.getenv('GROQ_API_KEY')
 
 # Load configuraion
-config_file = "config.json"
+config_file = "./artifacts/config.json"
 with open(config_file, "r") as file:
     config = json.load(file)
 
 # Collection name
-collection_name = config['COLLECTION_NAME']
+collection_name = config['COLLECTION_NAME']['bns-001']
 
 ## Connect to Qdrant client
 client = QdrantClient(url="http://localhost:6333/")
@@ -54,7 +54,7 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-def memory_chain(query: str, chat_history: list, embedding_model=embedding_model, llm=llm, client_url=client, collection_name=collection_name):
+def memory_chain(query: str, chat_history: list, embedding_model, llm, client_url, collection_name):
     
     # Embedding model
     embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model, 
@@ -72,15 +72,17 @@ def memory_chain(query: str, chat_history: list, embedding_model=embedding_model
     # Define system-prompt
     qa_system_prompt = (
         """You are legal advisor assistant for question-answering tasks.
-        Use the followinf piece of retrieved context to answer the following query.
-        Don't answer without referring the context.
-        Find Indian Penal Code (IPC) Section from the context. 
+        Use the following piece of retrieved context to answer the following query.
+        
+        **Don't answer without referring the context.**
+        
+        Find Bharatiya Nyaya Sanhita (BNS) Section which is criminal code of India from the context. 
         Focus on entities present in the information. Only add relevant information.
         
         USE BEAUTIFUL MARKDOWN FORMAT and ANSWER like chatbot. 
         
         Provide information in below format:
-        A. Sections:
+        A. BNS sections:
                 List all sections in below format:
                 Section (section number or name): Description \n
         
@@ -88,7 +90,8 @@ def memory_chain(query: str, chat_history: list, embedding_model=embedding_model
                 Define Punishments in detail for associate section name
         
         C. Legal Advice:
-            Define legal advice including police and medical if emergency.
+            Define legal advice including police and medical if emergency. Also prvoide
+            help line number for India.
         
         Context:
         {context}
@@ -147,16 +150,28 @@ def memory_chain(query: str, chat_history: list, embedding_model=embedding_model
     
     return responae
 
-# if __name__ == '__main__':
-#     chat_history = []
-#     i=0
+if __name__ == '__main__':
+    chat_history = []
+    i=0
     
-#     while i < 3:
-#         query = input("Ask a query ('exit' to quit): ")
-#         response = memory_chain(query, chat_history)
-#         chat_history.extend([HumanMessage(content=query), response["answer"]])
-#         print(response["answer"])
+    while i < 3:
+        query = input("Ask a query ('exit' to quit): ")
+        response = memory_chain(query, chat_history, embedding_model, llm, client, collection_name)
+        chat_history.extend([HumanMessage(content=query), response["answer"]])
+        print(response["answer"])
             
-#         print("\n\n")
-#         i += 1
-    
+        print("\n\n")
+        i += 1
+    # # Embedding model
+    # embeddings = GoogleGenerativeAIEmbeddings(model=embedding_model, 
+    #                                         google_api_key=gemini_api_key)
+
+    # # llm = ChatGroq(groq_api_key=groq_api_key,
+    # #             model=llm,
+    # #             temperature=0.2)
+
+    # vector_db = vector_store(embeddings, client, collection_name)
+    # retriever = vector_db.as_retriever(search_type="mmr", search_kwargs={"k":3})
+    # print(retriever)
+    # result = retriever.invoke("Uncle rapes 22 years old. Body found at railway station.")
+    # print(result)
