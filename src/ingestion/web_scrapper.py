@@ -3,12 +3,13 @@ import re
 import json
 import requests
 import warnings
+import argparse
 import asyncio
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
 # Load config file 
-config_file = "config.json"
+config_file = "./artifacts/config.json"
 with open(config_file, "r") as file:
     config = json.load(file)
 
@@ -82,7 +83,18 @@ async def main(section_type):
         json.dump(output_data, file, indent=2)
 
 if __name__ == '__main__':
-    asyncio.run(main("jja"))
-    # links = StoreDevganLinks(url=config['DEVGAN_LAW_LINKS']['JJA'])
-    # links.scrape_links()
-    # links.get_urls()
+    parser = argparse.ArgumentParser(description="Scrape linke from Devgan Law")
+    
+    # Add argument for section type 
+    parser.add_argument(
+        '--section_type',
+        type=str,
+        required=True,
+        help='The section type to scrape'
+    )
+    args = parser.parse_args()
+    
+    links = StoreDevganLinks(url=config['DEVGAN_LAW_LINKS'][args.section_type])
+    links.scrape_links()
+    links.get_urls()
+    asyncio.run(main(args.section_type))

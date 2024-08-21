@@ -13,7 +13,7 @@ with open(config_file, "r") as file:
     config = json.load(file)
 
 # Collection name
-collection_name = config['COLLECTION_NAME']
+collection_name = config['COLLECTION_NAME']['ipc-800']
 mongo_db_name = config['MONGODB']
 
 def insert_to_mongo(url, db_name, collection_name, section_type): 

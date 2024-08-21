@@ -2,9 +2,11 @@ import os
 import sys 
 import re 
 import json 
+import glob
 import time
 import requests
 import warnings
+import argparse
 import os 
 import re
 from dotenv import load_dotenv
@@ -29,20 +31,18 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 # Embedding Model
 embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=gemini_api_key)
 
-# Collection name
-collection_name = 'ipc-data'
-
-# IPC data file path
-ipc_data_path = './data/ipc_data.json'
-
 # Splitter
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=800)
 
 # Store in vector database
-def ingest_in_vectordb(text_chunk, embedding_model):
+def ingest_in_vectordb(text_chunk, embedding_model, collection_name):
     print("\nConnecting Qdrant DB")
+    
     # Connect to the QdrantDB local
     client = QdrantClient(url="http://localhost:6333/")
+    
+    # Delete existing collection 
+    client.delete_collection(collection_name)
     
     print("\nSetting Vectors Configuration")
     vectors_config = qdrant_client.http.models.VectorParams(
@@ -63,28 +63,40 @@ def ingest_in_vectordb(text_chunk, embedding_model):
         text_chunk,
         embedding_model,
         url="http://localhost:6333/",
-        # api_key=qdrant_api_key,
         collection_name=collection_name
     )
     print("\n> Chunk of text saved in DB with Embedding format.")
 
     
 # Ingest data from PDF format
-def pdf_loader():                                     
-    loader = DirectoryLoader("./data/", glob="**/*.pdf",
-                        show_progress=True, loader_cls=PyPDFLoader)
+def pdf_loader(section_type):
+    if section_type == 'bns':                                     
+        loader = PyPDFLoader("./data/BNS.pdf")
     print("\nSplitting PDF documents")
-    documents = loader.load_and_split(text_splitter=splitter)
+    documents = loader.load_and_split(text_splitter=text_splitter)
     return documents
 
 
-def json_loader():
-    with open(ipc_data_path, 'r') as json_file:
-        ipc_data = json.load(json_file)
+def json_loader(section_type):
+    section_data = []
+    
+    if section_type=='all_sections':
+        file_paths = glob.glob(f"./data/*_data.json")
+        
+        for path in file_paths:
+            with open(path, 'r') as file:
+                data = json.load(file)
+                section_data.extend(data)
+        with open('./data/all_sections_data.json', 'w') as outputfile:
+            json.dump(section_data, outputfile, indent=4)
+    else:
+        data_path = f'./data/{section_type}_data.json'
+        with open(data_path, 'r') as json_file:
+            section_data = json.load(json_file)
 
     # Create a Langchain document for each JSON record 
     documents = []
-    for record in ipc_data:
+    for record in section_data:
         document = Document(
             page_content=record['content'],
             metadata={'section':record['section']}
@@ -95,7 +107,49 @@ def json_loader():
     return docs
 
 
+# Main funciton to execute the script
+def main(section_type, data_type, collection_name):
+    # try:
+    print("\n\n> Loading files..")
+    if data_type == 'json':
+        docs = json_loader(section_type)
+    elif data_type=='pdf':
+        docs = pdf_loader(section_type)
+    print("\n> Saved in document loader format...")
+    print("\n> Ingesting into Qdrant DB..")
+    ingest_in_vectordb(docs, embeddings, collection_name)
+    print("\n>Ingested in QdrantDB")
+    print("\n> Data ingestion successful")
+    print("\n\n")
+    # except Exception as e:
+    #     print(f"Something went wrong while data ingestion to vector db: {e}")
+
+
 ## Ingest data from JSON data
 if __name__ == '__main__':
-    json_docs = json_loader()
-    ingest_in_vectordb(json_docs, embeddings)
+    parser = argparse.ArgumentParser(description="Load JSON documents and ingest them into QdrantDB.")
+    
+    parser.add_argument(
+        '--section_type',
+        type=str,
+        required=True,
+        help="The type of section to load JSON documents for [use `all_sections` for all sections]."
+    )
+    
+    parser.add_argument(
+        '--data_type',
+        type=str,
+        required=True,
+        help="Define type of data pdf or json"
+    )
+    
+    parser.add_argument(
+        '--collection_name',
+        type=str,
+        required=True,
+        help="The name of the collection"
+    )
+    
+    args = parser.parse_args()
+    
+    main(args.section_type, args.data_type, args.collection_name)
