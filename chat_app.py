@@ -1,8 +1,7 @@
 import streamlit as st 
 import os 
 import json
-from src.retriever import memory_chain
-from src.agents import judicial_agent
+from src.generate_response import get_response
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient 
 
@@ -10,6 +9,8 @@ load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 groq_api_key = os.getenv('GROQ_API_KEY')
 qdrant_url = os.getenv('QDRANT_URI')
+qdrant_cloud_url = os.getenv("QDRANT_CLOUD_URL")
+qdrant_cloud_api_key = os.getenv("QDRANT_CLOUD_API_KEY")
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
@@ -18,10 +19,11 @@ def chat_ui():
 
     st.set_page_config(page_title='NyayNidhi', page_icon='⚖️')
     st.title("NyayNidhi.AI")
+    st.markdown("*v0.0.1 beta*")
     st.warning("NyayNidhi can make mistakes. Verify responses before any action.")
 
     # Add a sidebar with radio buttons
-    section_option = st.sidebar.selectbox("Select Data", ["IPC", "BNS"], placeholder="Select Criminal Code")
+    # section_type = st.sidebar.selectbox("Select Data", ["BNS"], placeholder="Select Criminal Code")
     
     try:
         # Print the selected data
@@ -39,11 +41,10 @@ def chat_ui():
         def process_query(query):
             st.session_state.chat_history = []
             
-            response = judicial_agent(query, st.session_state.chat_history, 
-                                    section_type=section_option)
+            response = get_response(query, "BNS", st.session_state.chat_history)
             
-            st.session_state.chat_history.extend({"human":query, "ai":response["output"]})
-            return response["output"]
+            st.session_state.chat_history.extend({"human":query, "ai":response['output']})
+            return response['output']
 
         if prompt := st.chat_input("Ask a query: "):
             st.session_state.messages.append({"role": "user", "content": prompt})
