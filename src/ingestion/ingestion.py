@@ -27,6 +27,8 @@ from langchain_chroma import Chroma
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 groq_api_key = os.getenv("GROQ_API_KEY")
+qdrant_cloud_url = os.getenv("QDRANT_CLOUD_URL")
+qdrant_cloud_api_key = os.getenv("QDRANT_CLOUD_API_KEY")
 
 # Embedding Model
 embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=gemini_api_key)
@@ -35,36 +37,60 @@ embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", goo
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=800)
 
 # Store in vector database
-def ingest_in_vectordb(text_chunk, embedding_model, collection_name):
+def ingest_in_vectordb(text_chunk, embedding_model, collection_name, to_cloud=False):
     print("\nConnecting Qdrant DB")
     
-    # Connect to the QdrantDB local
-    client = QdrantClient(url="http://localhost:6333/")
     
-    # Delete existing collection 
-    client.delete_collection(collection_name)
+    ## Connect to Qdrant Cloud
+    if to_cloud:
+        print("\n>Uploading to Cloud")
+        client = QdrantClient(
+            url=qdrant_cloud_url,
+            api_key=qdrant_cloud_api_key,
+        )
+    else:
+        print("\nUploading locally")
+        # Connect to the QdrantDB local
+        client = QdrantClient(url="http://localhost:6333/")
     
-    print("\nSetting Vectors Configuration")
-    vectors_config = qdrant_client.http.models.VectorParams(
-        size=768,
-        distance=qdrant_client.http.models.Distance.COSINE
-    )
+    # Verify existing collection
+    is_exists_collection = client.collection_exists(collection_name=collection_name)
+    if not is_exists_collection:
+        print("\nSetting Vectors Configuration")
+        vectors_config = qdrant_client.http.models.VectorParams(
+            size=768,
+            distance=qdrant_client.http.models.Distance.COSINE
+        )
+        
+        # Creating collection
+        print("\nCreating collection")
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=vectors_config,
+        )
     
-    # Creating collection
-    print("\nCreating collection")
-    client.create_collection(
-        collection_name=collection_name,
-        vectors_config=vectors_config,
-    )
-    
-    # Save in QdrantDB
-    print("\nSaving into QdrantDB")
-    qdrant = Qdrant.from_documents(
-        text_chunk,
-        embedding_model,
-        url="http://localhost:6333/",
-        collection_name=collection_name
-    )
+    if to_cloud:
+        # Save in QdrantDB Cloud
+        print("\nSaving into QdrantDB Cloud")
+        qdrant = Qdrant.from_documents(
+            text_chunk,
+            embedding_model,
+            url=qdrant_cloud_url,
+            prefer_grpc=True,
+            api_key=qdrant_cloud_api_key,
+            collection_name=collection_name,
+        )
+    else:
+        # Save in QdrantDB
+        print("\nSaving into QdrantDB")
+        qdrant = Qdrant.from_documents(
+            text_chunk,
+            embedding_model,
+            url="http://localhost:6333/",
+            collection_name=collection_name
+        )
+
+        
     print("\n> Chunk of text saved in DB with Embedding format.")
 
     
@@ -108,7 +134,7 @@ def json_loader(section_type):
 
 
 # Main funciton to execute the script
-def main(section_type, data_type, collection_name):
+def main(section_type, data_type, collection_name, to_cloud):
     # try:
     print("\n\n> Loading files..")
     if data_type == 'json':
@@ -117,7 +143,7 @@ def main(section_type, data_type, collection_name):
         docs = pdf_loader(section_type)
     print("\n> Saved in document loader format...")
     print("\n> Ingesting into Qdrant DB..")
-    ingest_in_vectordb(docs, embeddings, collection_name)
+    ingest_in_vectordb(docs, embeddings, collection_name, to_cloud)
     print("\n>Ingested in QdrantDB")
     print("\n> Data ingestion successful")
     print("\n\n")
@@ -127,7 +153,7 @@ def main(section_type, data_type, collection_name):
 
 ## Ingest data from JSON data
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Load JSON documents and ingest them into QdrantDB.")
+    parser = argparse.ArgumentParser(description="Load JSON documents or PDFs and ingest them into QdrantDB.")
     
     parser.add_argument(
         '--section_type',
@@ -150,6 +176,13 @@ if __name__ == '__main__':
         help="The name of the collection"
     )
     
+    parser.add_argument(
+        '--to_cloud',
+        type=bool,
+        required=False,
+        help="Upload data to Qdrant Cloud"
+    )
+    
     args = parser.parse_args()
     
-    main(args.section_type, args.data_type, args.collection_name)
+    main(args.section_type, args.data_type, args.collection_name, args.to_cloud)
