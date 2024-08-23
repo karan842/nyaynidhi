@@ -11,3 +11,4 @@
  langchain-community
  wikibase-rest-api-client 
  mediawikiapi
+ langchain-qdrant
