@@ -21,6 +21,15 @@ from langchain import hub
 from qdrant_client import QdrantClient
 from src.agents_utils.retriever import vector_store
 from src.utils import load_prompt_template
+from langchain_community.tools.wikipedia.tool import WikipediaQueryRun
+
+# Define Wikipedia tool
+@tool
+def query_wikipedia(query):
+    """Search for a query on wikipedia and return the result"""
+    wikipedia_tool = WikipediaQueryRun()
+    result = wikipedia_tool.run(query)
+    return result
 
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -92,7 +101,7 @@ def judicial_agent(query, section_type, chat_history, rerank=False, top_k=5):
     # Define components such as prompts, agent and executor
     prompt_template = PromptTemplate.from_template(template=template)
     agentprompt = hub.pull("hwchase17/react-chat")
-    tools = [query_legal_data, TavilySearchResults(max_results=3)]
+    tools = [query_legal_data, TavilySearchResults(max_results=3), query_wikipedia]
     agent = create_react_agent(
         llm=llm,
         tools=tools,
