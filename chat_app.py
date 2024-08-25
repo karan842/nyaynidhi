@@ -18,6 +18,18 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 def chat_ui():
 
     st.set_page_config(page_title='NyayNidhi', page_icon='⚖️', layout='wide')
+    st.markdown(
+    """
+    <style>
+    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+    .viewerBadge_text__1JaDK {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+    )
     st.title("NyayNidhi.AI")
     st.markdown("*v0.0.1 beta*")
     st.warning("NyayNidhi can make mistakes. Verify responses before any action.")
