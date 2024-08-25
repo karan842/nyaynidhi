@@ -17,7 +17,7 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 def chat_ui():
 
-    st.set_page_config(page_title='NyayNidhi', page_icon='⚖️')
+    st.set_page_config(page_title='NyayNidhi', page_icon='⚖️', layout='wide')
     st.title("NyayNidhi.AI")
     st.markdown("*v0.0.1 beta*")
     st.warning("NyayNidhi can make mistakes. Verify responses before any action.")
