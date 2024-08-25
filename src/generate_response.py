@@ -30,7 +30,6 @@ def get_response(query:str, section_type:str, chat_history:list):
     # Check if the anwer present in the cache
     cached_response = semantic_cache.find_in_cache(query)
     if cached_response['output']:
-        print("\n\n> CACHING FROM RESPONSES... \n\n")
         return cached_response
 
     # If the answer is not in the cache, generate it using the judicial agent
