@@ -8,3 +8,5 @@ chroma_db/
 qdrantDB
 *.pyc
 __pycache__/
+*.csv
+*.sh
