@@ -11,8 +11,8 @@ groq_api_key = st.secrets['GROQ_API_KEY']
 qdrant_url = st.secrets['QDRANT_URI']
 qdrant_cloud_url = st.secrets["QDRANT_CLOUD_URL"]
 qdrant_cloud_api_key = st.secrets["QDRANT_CLOUD_API_KEY"]
-os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
+# os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+# os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 
 def chat_ui():
