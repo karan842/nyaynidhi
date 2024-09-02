@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 # Generate response including semantic cache
-def get_response(query:str, section_type:str, chat_history:list):
+def get_response(query:str, chat_history:list, section_type="BNS"):
     
     # Load config
     config_file = "./artifacts/config.json"

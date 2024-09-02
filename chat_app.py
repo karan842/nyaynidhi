@@ -53,7 +53,7 @@ def chat_ui():
         def process_query(query):
             st.session_state.chat_history = []
             
-            response = get_response(query, "BNS", st.session_state.chat_history)
+            response = get_response(query, st.session_state.chat_history)
             
             st.session_state.chat_history.extend({"human":query, "ai":response['output']})
             return response['output']
