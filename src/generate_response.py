@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 # Generate response including semantic cache
-def get_response(query:str, chat_history:list, section_type="BNS"):
+async def get_response(query:str, chat_history:list, section_type="BNS"):
     
     # Load config
     config_file = "./artifacts/config.json"
@@ -40,4 +40,15 @@ def get_response(query:str, chat_history:list, section_type="BNS"):
     
     return response
 
+if __name__ == "__main__":
+    chat_history = []
     
+    i = 0
+    
+    while i < 3:
+        query = input("Ask a query: ")
+        response = get_response(query,chat_history=chat_history)
+        chat_history.extend({"human":query, "ai":response["output"]})
+        print(response['output'])
+        print("\n\n")
+        i+=1
