@@ -11,7 +11,8 @@ groq_api_key = st.secrets['GROQ_API_KEY']
 qdrant_url = st.secrets['QDRANT_URI']
 qdrant_cloud_url = st.secrets["QDRANT_CLOUD_URL"]
 qdrant_cloud_api_key = st.secrets["QDRANT_CLOUD_API_KEY"]
-# os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+
+# os.environ["LANGCHAIN_API_KEY"] = os.getenv["LANGCHAIN_API_KEY"]
 # os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 
@@ -31,12 +32,24 @@ def chat_ui():
     unsafe_allow_html=True
     )
     st.title("NyayNidhi.AI")
-    st.markdown("*v0.0.1 beta*")
+    st.markdown("*v0.0.1 beta*  [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfrbTdAxQ3zQvH2M5k-HD9huWZht7rp51sS6_AYBS1h1oaGIQ/viewform?usp=sf_link)")
     st.warning("NyayNidhi can make mistakes. Verify responses before any action.")
-
-    # Add a sidebar with radio buttons
-    # section_type = st.sidebar.selectbox("Select Data", ["BNS"], placeholder="Select Criminal Code")
     
+    # Streamlit Sidebar with Example Queries
+    st.sidebar.title("Example Queries to Try")
+
+    queries = [
+        "How can a woman travel in India alone?",
+        "A 22-year-old girl was raped by men in Kolkata RG Kar Medical College.",
+        "What are the laws of foriegn direct investment in Stock market?",
+        "A random guy was staring at me in the metro and attempted to take my photo.",
+        "Which cities in India has most rapse cases?",
+        "Hey! Someone's dog bite me."
+    ]
+
+    for query in queries:
+        st.sidebar.write(f"• {query}")
+        
     try:
         # Print the selected data
         # st.toast(body=f"Selection Section: {section_option}", icon="✅")
