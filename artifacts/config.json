@@ -1,7 +1,8 @@
 {
     "EMBEDDING_MODEL": "models/text-embedding-004",
     "GEMINI": "gemini-1.0-pro",
-    "LLAMA": "llama-3.1-70b-versatile",
+    "LLAMA3.1": "llama-3.1-70b-versatile",
+    "LLAMA": "llama-3.2-90b-text-preview",
     "MIXTRAL": "mixtral-8x7b-32768",
     "IS_QDRANT_TO_CLOUD": true,
     "COLLECTION_NAME": {

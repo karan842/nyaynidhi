@@ -33,6 +33,7 @@ def chat_ui():
     )
     st.title("NyayNidhi.AI")
     st.markdown("*v0.0.1 beta*  [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfrbTdAxQ3zQvH2M5k-HD9huWZht7rp51sS6_AYBS1h1oaGIQ/viewform?usp=sf_link)")
+    st.markdown("**Llama3.2 by Groq**")
     st.warning("NyayNidhi can make mistakes. Verify responses before any action.")
     
     # Streamlit Sidebar with Example Queries
