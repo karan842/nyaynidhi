@@ -1,53 +1,46 @@
-import requests
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Dict, Union
+from src.generate_response import get_response
+import uvicorn
 
-BASE_URL = "http://127.0.0.1:8000"  # Assuming the FastAPI server is running locally
+app = FastAPI()
 
-# Step 1: Start a new session
-def start_session():
-    response = requests.post(f"{BASE_URL}/start-session")
-    if response.status_code == 200:
-        session_id = response.json()["session_id"]
-        print(f"Session started successfully. Session ID: {session_id}")
-        return session_id
-    else:
-        print("Failed to start a session")
-        return None
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins; adjust this for specific domains in production
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (e.g., GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
-# Step 2: Send a chat message
-def send_chat_message(session_id, prompt):
-    payload = {"prompt": prompt}
-    response = requests.post(f"{BASE_URL}/chat", json=payload, params={"session_id": session_id})
-    if response.status_code == 200:
-        chat_response = response.json()["response"]
-        print(f"Chatbot response: {chat_response}")
-        return chat_response
-    else:
-        print("Failed to send chat message")
-        return None
+# Define the data model for the request body
+class ChatRequest(BaseModel):
+    query: str
 
-# Step 3: Get chat history
-def get_chat_history(session_id):
-    response = requests.get(f"{BASE_URL}/chat-history", params={"session_id": session_id})
-    if response.status_code == 200:
-        history = response.json()
-        print("Chat History:")
-        for message in history:
-            print(f"User: {message['human']}")
-            print(f"AI: {message['ai']}")
-        return history
-    else:
-        print("Failed to retrieve chat history")
-        return None
+# Define the data model for the response
+class ChatResponse(BaseModel):
+    output: str
+    chat_history: List[Dict[str, Union[str, str]]]
 
-# Testing the API
-if __name__ == "__main__":
-    # Start a new session
-    session_id = start_session()
-    
-    if session_id:
-        # Send a few chat messages
-        send_chat_message(session_id, "Hello, how are you?")
-        send_chat_message(session_id, "What's the weather like today?")
+# Chat history storage
+chat_history = []
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    try:
+        # Process the query with the current chat history
+        response = await get_response(request.query, chat_history)
         
-        # Retrieve the chat history
-        get_chat_history(session_id)
+        # Append new entries to chat history
+        chat_history.extend([{"role": "human", "content": request.query}, {"role": "assistant", "content": response["output"]}])
+        
+        return ChatResponse(output=response["output"], chat_history=chat_history)
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Something went wrong with processing the request.")
+
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=8000)
