@@ -44,7 +44,7 @@ def chat_ui():
         "A 22-year-old girl was raped by men in Kolkata RG Kar Medical College.",
         "What are the laws of foriegn direct investment in Stock market?",
         "A random guy was staring at me in the metro and attempted to take my photo.",
-        "Which cities in India has most rapse cases?",
+        "Which cities in India has most rape cases?",
         "Hey! Someone's dog bite me."
     ]
 
